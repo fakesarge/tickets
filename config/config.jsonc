@@ -1,0 +1,148 @@
+{
+  // ── Core IDs ──────────────────────────────────────────────────────────
+  "clientId": "1492319592826142780", // The id of the discord bot
+  "guildId": "1221532354565242960", // Your server's ID
+  "mainColor": "#ffffff", // Fallback accent color for ticket-type overrides
+
+  "openTicketChannelId": "1242256616254865480", // Channel where the "open a ticket" panel is posted
+  "logsChannelId": "1240431222040039434", // Channel where ticket events (create/claim/close/etc) are logged
+  "logs": true, // Set false to disable the logs channel entirely
+
+  // ── Branding ──────────────────────────────────────────────────────────
+  // Everything visual lives here so the whole bot can be re-skinned from this file.
+  // Panel images: assets/logo.png + assets/banner.png (TICKET CENTER panel),
+  // assets/ticketwelcome.png (per-ticket welcome panel banner, falls back to banner.png).
+  "branding": {
+    "name": "74HRS",
+    "websiteUrl": "https://74hrs.store", // Terms link, "Website" buttons, {{TERMS_URL}} in flow answers
+    "supportUrl": "https://discord.com", // "Support" button on /stripe dashboard
+    "colors": {
+      "panel": "#B34BFC", // The standalone "TICKET CENTER" select panel
+      "accent": "#B55CFF", // Welcome panel, terms, guided-flow steps, staff takeover, close DM
+      "escalation": "#A78EFF" // The single "hand this off to staff" message
+    },
+    "emojis": {
+      "bullet": "<:purplebullet:1549446738685857942>",
+      "relay": "<:relay:1549816544543113246>",
+      "back": "<:518471lastpage:1549829692994101248>",
+      "restart": "<:6129spotifyrepeat:1549829658713788476>",
+      "talkToStaff": "<:944992bell:1549829721942925412>",
+      "modalContinue": "📝",
+      "agent": "🧑‍💼",
+      "resolved": "✅",
+      "escalation": "<:angryrelay:1549821076362760233>"
+    },
+    "panel": {
+      "heading": "TICKET CENTER",
+      "subheading": "A dedicated support system just for you",
+      "notice": "Opening a ticket for a purchase means you agree to our terms and services. We dont offer refunds of any kind at any time.",
+      "footer": "Please select the right category for your ticket for easy of handling."
+    }
+  },
+
+  // ── Ticket types ──────────────────────────────────────────────────────
+  // Each one becomes a button on the ticket panel (in this order). With more than
+  // 10 types the panel switches to a select menu automatically.
+  //
+  // Opening any ticket type sends a single welcome panel with a "Continue" button.
+  // Continue reveals the Terms & Conditions prompt in the same message; Agree opens a
+  // modal for a signature plus up to 4 of this type's "questions" (billing gets its own
+  // fixed 3-field modal instead — purchase type, details, misc). The answers are stored
+  // for the ticketCreate log entry only; they aren't displayed in the channel.
+  //
+  // A ticket type whose codeName has a matching guided conversation flow (see
+  // src/lib/flows/registry.ts — currently "support", "billing", "partnerships") also
+  // starts that flow immediately: the customer's chat is locked to buttons/menus, they're
+  // walked through a decision tree, and it either resolves automatically or hands off to
+  // staff (unlocking chat + pinging roles). To add a flow for a new codeName, drop a file
+  // in src/lib/flows/definitions/ and register it in registry.ts.
+  "ticketTypes": [
+    {
+      "codeName": "billing",
+      "name": "Billing",
+      "description": "For billing or subscription related inquiries",
+      "emoji": "💳",
+      "buttonEmoji": "📝", // Panel button
+      "buttonStyle": "Success",
+      "color": "#ffffff", // blank = mainColor
+      "categoryId": "1221532354565242965",
+      "ticketNameFormat": "ticket-{count}", // {count} {username} {userid}
+      "staffRoleIds": [], // blank = rolesWithTicketAccess
+      "cantAccessRoleIds": [],
+      "questions": [
+        { "label": "Purchase type (VFX, GFX, or Other)", "style": "SHORT", "placeholder": "VFX, GFX, or Other", "maxLength": 40, "required": true },
+        { "label": "Describe what you need", "style": "PARAGRAPH", "placeholder": "Deliverables, style, references, deadline…", "maxLength": 1000, "required": true },
+        { "label": "Miscellaneous (optional)", "style": "PARAGRAPH", "placeholder": "Promo codes, invoice notes…", "maxLength": 1000, "required": false }
+      ]
+    },
+    {
+      "codeName": "support",
+      "name": "Support",
+      "description": "For customer support related issues",
+      "emoji": "🛒",
+      "buttonEmoji": "📡",
+      "buttonStyle": "Secondary",
+      "color": "#ffffff",
+      "categoryId": "1242256784194801734",
+      "ticketNameFormat": "ticket-{count}",
+      "staffRoleIds": [],
+      "cantAccessRoleIds": [],
+      "questions": [{ "label": "What is the reason of the ticket?", "style": "SHORT", "placeholder": "Please enter the reason", "maxLength": 1000, "required": true }]
+    },
+    {
+      "codeName": "partnerships",
+      "name": "Partnerships",
+      "description": "Sponsorships, collabs, and business partnerships",
+      "emoji": "🎬",
+      "buttonEmoji": "🎬",
+      "buttonStyle": "Secondary",
+      "color": "#ffffff",
+      "categoryId": "1242256784194801734",
+      "ticketNameFormat": "ticket-{count}",
+      "staffRoleIds": [],
+      "cantAccessRoleIds": [],
+      "questions": [
+        {
+          "label": "Describe the partnership or opportunity",
+          "style": "PARAGRAPH",
+          "placeholder": "Brand, audience, goals, timeline, what you offer…",
+          "maxLength": 1000,
+          "required": true
+        }
+      ]
+    }
+  ],
+
+  // ── Access control ────────────────────────────────────────────────────
+  "rolesWithTicketAccess": ["1551417696204365824"], // "staff" roles — can see all tickets, claim, close, add/remove users
+  "rolesBlockedFromCreatingTickets": [], // blacklist
+  "maxOpenTicketsPerUser": 0, // 0 = unlimited
+
+  "pingRolesOnOpen": ["1551417696204365824"], // fallback staff role IDs pinged when a ticket escalates (used when the ticket type has no staffRoleIds)
+
+  // ── Claiming ──────────────────────────────────────────────────────────
+  "claim": {
+    "enabled": true,
+    "showButton": false, // show a Claim button on the welcome panel (the /claim command always works). Note: once "Continue" is pressed this button doesn't carry over to the terms prompt.
+    "renameOnClaim": "✔️ Ticket-{count}", // {count} {staffusername} {creatorusername}; blank to disable
+    "moveToCategoryId": "" // optional category to move claimed tickets into
+  },
+
+  // ── Closing ───────────────────────────────────────────────────────────
+  // There is no close button anywhere — /close reason:<text> is the only way to close a ticket.
+  "close": {
+    "onlyStaffCanClose": true, // if false, the ticket creator can close it too
+    "dmUserOnClose": true,
+    "createTranscript": true, // generates a local HTML transcript, no external upload
+    "deleteAfterCloseSeconds": 0, // 0 = never auto-delete; e.g. 15 to delete 15s after close
+    "moveToCategoryId": "1382492247454384199" // optional category closed tickets are moved to
+  },
+
+  // ── Presence ──────────────────────────────────────────────────────────
+  "presence": {
+    "enabled": true,
+    "status": "online", // online | idle | dnd | invisible
+    "activityType": "WATCHING", // PLAYING | LISTENING | WATCHING | COMPETING
+    "activityText": "74hrs.store"
+  }
+}

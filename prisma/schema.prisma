@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model config {
+  key   String  @id
+  value String?
+}
+
+model tickets {
+  id           Int     @id @default(autoincrement())
+  channelId    String  @unique
+  messageId    String
+  typeCodeName String
+  creator      String
+  invited      String  @default("[]")
+  reason       String  @default("")
+  createdAt    BigInt
+  claimedBy    String?
+  claimedAt    BigInt?
+  closedBy     String?
+  closedAt     BigInt?
+  closeReason  String?
+  transcriptId String?
+  termsMessageId String?
+
+  // Guided conversation flow state (see src/lib/flows)
+  flowStep      String?
+  flowMessageId String?
+  flowHistory   String  @default("[]")
+  flowSelections String @default("{}")
+  flowResponses String  @default("{}")
+  escalated     Boolean @default(false)
+  staffTakeover Boolean @default(false)
+}

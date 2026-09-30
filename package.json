@@ -1,0 +1,33 @@
+{
+  "name": "discord-ticket-bot",
+  "version": "1.0.0",
+  "description": "A ticket bot built with discord.js v14 and Discord Components V2, with a plug-and-play command/event loader.",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "setup": "npm install && prisma db push",
+    "build": "rimraf dist && tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "lint": "eslint . --ext .ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "discord.js": "^14.27.0",
+    "dotenv": "^16.4.5",
+    "fs-extra": "^11.2.0",
+    "jsonc-parser": "^3.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.7.5",
+    "eslint": "^10.11.0",
+    "prisma": "^5.22.0",
+    "rimraf": "^6.0.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.70.1"
+  }
+}
