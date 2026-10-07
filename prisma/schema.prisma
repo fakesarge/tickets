@@ -38,3 +38,13 @@ model tickets {
   escalated     Boolean @default(false)
   staffTakeover Boolean @default(false)
 }
+
+// VIP memberships are tracked here (not in Supabase). Admins set the expiry; reminderSentAt records
+// that the "expires in 7 days" DM has gone out so it is only sent once per expiry date.
+model vips {
+  discordId      String  @id
+  expiresAt      BigInt
+  grantedBy      String
+  grantedAt      BigInt
+  reminderSentAt BigInt?
+}

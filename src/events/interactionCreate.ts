@@ -1,4 +1,4 @@
-import { ButtonInteraction, ChannelType, ChatInputCommandInteraction, GuildMember, Interaction, StringSelectMenuInteraction, TextChannel } from "discord.js";
+import { AutocompleteInteraction, ButtonInteraction, ChannelType, ChatInputCommandInteraction, GuildMember, Interaction, StringSelectMenuInteraction, TextChannel } from "discord.js";
 import BaseEvent from "../structure/BaseEvent";
 import { getTicketType, isBlacklisted, isBlockedFromTicketType, isStaffFor } from "../lib/tickets";
 import { claimTicket, createTicket, deleteTicketChannel } from "../lib/ticketActions";
@@ -13,6 +13,7 @@ type OpenInteraction = ButtonInteraction | StringSelectMenuInteraction;
 export default class InteractionCreateEvent extends BaseEvent {
 	public async execute(interaction: Interaction): Promise<void> {
 		if (interaction.isChatInputCommand()) return this.handleCommand(interaction);
+		if (interaction.isAutocomplete()) return this.handleAutocomplete(interaction);
 
 		if (interaction.isStringSelectMenu()) {
 			if (interaction.customId === "ticket_open_select") return this.openTicket(interaction, interaction.values[0]);
@@ -45,6 +46,17 @@ export default class InteractionCreateEvent extends BaseEvent {
 			customId.startsWith("flow_btn__") ||
 			customId.startsWith("flow_modalopen__")
 		);
+	}
+
+	private async handleAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+		const command = this.client.commands.get(interaction.commandName);
+		if (!command?.autocomplete) return void interaction.respond([]).catch(() => null);
+		try {
+			await command.autocomplete(interaction);
+		} catch (err) {
+			console.error(`Error in /${interaction.commandName} autocomplete:`, err);
+			if (!interaction.responded) await interaction.respond([]).catch(() => null);
+		}
 	}
 
 	private async handleCommand(interaction: ChatInputCommandInteraction): Promise<void> {

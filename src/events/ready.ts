@@ -1,6 +1,8 @@
 import { ActivityType, ChannelType, TextChannel } from "discord.js";
 import BaseEvent from "../structure/BaseEvent";
 import { buildTicketPanel } from "../ui/panel";
+import { startVipReminders } from "../lib/vip";
+import { startShopStatus } from "../lib/shopStatus";
 
 const ACTIVITY_TYPES: Record<string, ActivityType> = {
 	PLAYING: ActivityType.Playing,
@@ -18,6 +20,8 @@ export default class ReadyEvent extends BaseEvent {
 
 		await this.postOrUpdatePanel();
 		this.setPresence();
+		startVipReminders(this.client);
+		startShopStatus(this.client);
 	}
 
 	/** Checks that every guild-scoped ID in config.jsonc actually resolves, so a typo'd category or

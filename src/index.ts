@@ -15,12 +15,12 @@ if (!token || !token.trim()) throw new Error("TOKEN environment variable is requ
 const config = loadConfig();
 initTheme(config.branding);
 
-const client = new ExtendedClient(
-	{
-		intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers],
-	},
-	config
-);
+// Presence is a privileged intent: it's only requested when the shop-status board is set up to show live activity,
+// and it must also be switched on in the Developer Portal (Bot → Privileged Gateway Intents → Presence Intent).
+const intents = [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers];
+if (config.shopStatus?.channelId && config.shopStatus.trackPresence !== false) intents.push(GatewayIntentBits.GuildPresences);
+
+const client = new ExtendedClient({ intents }, config);
 
 client.loadCommands();
 client.loadEvents();

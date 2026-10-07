@@ -40,6 +40,11 @@ export function loadConfig(): BotConfig {
 	optionalSnowflake(config.claim?.moveToCategoryId, "claim.moveToCategoryId", errors);
 	optionalSnowflake(config.close?.moveToCategoryId, "close.moveToCategoryId", errors);
 
+	if (config.shopStatus) {
+		requireSnowflake(config.shopStatus.channelId, "shopStatus.channelId", errors);
+		optionalSnowflake(config.shopStatus.pingRoleId, "shopStatus.pingRoleId", errors);
+	}
+
 	if (!Array.isArray(config.ticketTypes) || config.ticketTypes.length === 0) errors.push("at least one ticket type is required");
 	if (config.ticketTypes?.length > 25) errors.push("a maximum of 25 ticket types is supported (Discord limit)");
 

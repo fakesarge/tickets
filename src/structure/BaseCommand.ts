@@ -1,4 +1,5 @@
 import {
+	AutocompleteInteraction,
 	ChatInputCommandInteraction,
 	SlashCommandBuilder,
 	SlashCommandOptionsOnlyBuilder,
@@ -25,4 +26,7 @@ export default abstract class BaseCommand {
 	}
 
 	abstract execute(interaction: ChatInputCommandInteraction): unknown | Promise<unknown>;
+
+	/** Optional: answer autocomplete for any option marked `.setAutocomplete(true)` on this command. */
+	autocomplete?(interaction: AutocompleteInteraction): unknown | Promise<unknown>;
 }

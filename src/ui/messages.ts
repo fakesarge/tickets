@@ -54,6 +54,15 @@ export const MSG = {
 	termsNoStep: "This ticket has no terms step recorded.",
 	termsAccepted: "Terms accepted — your ticket is ready. Thank you!",
 
+	adminOnly: "Only admins can use that.",
+	ordersNotConfigured: "Orders aren't connected yet — an admin needs to set `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `BOT_API_SECRET` in the bot's .env.",
+	orderNotFound: "I couldn't find that order.",
+	ordersLookupFailed: "Something went wrong looking that up. Please try again in a moment.",
+	orderOwnOnly: "You can only view your own orders.",
+	vipRevoked: (userId: string) => `> Removed VIP from <@${userId}>`,
+	vipNotFound: (userId: string) => `<@${userId}> doesn't have a VIP record.`,
+	vipOwnOnly: "You can only check your own VIP.",
+
 	flowStaffHandling: "A staff member is already handling this ticket.",
 	flowModalAck: "Got it — thanks!",
 };

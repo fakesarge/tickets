@@ -1,4 +1,5 @@
 import path from "node:path";
+import { MessageFlags } from "discord.js";
 import { Branding } from "../lib/types";
 
 let current: Branding | undefined;
@@ -22,3 +23,7 @@ export function pingLine(roleIds: string[]): string {
 
 /** Zero-width left-to-right mark used in the original designs to force blank lines / spacing. */
 export const LRM = "‎";
+
+
+/** Components V2 message visible only to the person who ran the command. */
+export const V2_EPHEMERAL = (MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral) as MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral;

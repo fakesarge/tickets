@@ -97,12 +97,99 @@ Every colour, emoji, and piece of panel copy lives in the `branding` block of
 incoming / available balances. Set `STRIPE_SECRET_KEY` in `.env` — a **restricted, read-only key** (Balance,
 Balance transactions, Account) is all it needs. The command is administrator-only and replies ephemerally.
 
+## Orders (linked to the website's Supabase)
+
+`/order` reads and writes the same `orders` table the website dashboard uses, so changes show up in the
+customer's dashboard and trigger the site's existing order notifications.
+
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/order list` | anyone | Your own orders and their status. Admins can add `user:` to see someone else's. |
+| `/order view` | anyone | One order in full (autocomplete lists your orders). Customers can only open their own. |
+| `/order add` | admin | Creates an order for a customer: `user`, `name`, `price`, optional `category`, `service`, `description`. |
+| `/order edit` | admin | Change an order's name, price, category, service, or description. |
+| `/order status` | admin | Set `pending`, `in_progress`, `completed`, or `cancelled`. |
+
+- Customers are matched by `orders.discord_id`. `/order add` needs the customer to have linked their Discord on the
+  website (it fills the order's required email/name from their profile) — same rule as the website's own order form.
+- The database only accepts the categories `gfx` / `vfx` / `template` and the four statuses above, so the commands offer exactly those.
+- **Status DMs:** when an admin changes an order's status with `/order status`, the customer gets a DM showing the old
+  and new status (with Website / Tickets buttons). The admin's reply says whether it was delivered. Only status changes
+  DM — editing a name or price doesn't, and setting the same status again does nothing. Customers with DMs closed
+  don't block the update. Changes made directly in the website dashboard don't go through the bot, so they don't DM.
+- Replies are private (ephemeral) because they contain customer data.
+
+**How it's connected (no server to host):** the bot talks to Supabase directly, but never with the service-role key.
+`supabase/bot-orders.sql` adds five small database functions (`bot_orders_list/get/search/create/update`). The bot
+calls them through Supabase's built-in API using the project's *public* anon key plus its own `BOT_API_SECRET`; each
+function checks that secret (stored only as a SHA-256 hash) before doing anything. The anon role has no access to the
+tables themselves, so even if the bot's `.env` leaked, all anyone could do is list/read/create/edit orders — no
+deleting, no customer emails or referral codes in any response, nothing outside `orders`. To cut the bot off,
+run `delete from bot_private.credentials;` in the SQL editor.
+
+**Setup (once):**
+
+1. In `.env` set `SUPABASE_URL`, `SUPABASE_ANON_KEY` (the public key) and `BOT_API_SECRET` (any long random string).
+2. Supabase dashboard → **SQL Editor** → paste and run `supabase/bot-orders.sql`.
+3. Run `npm run -s orders:secret` and paste the SQL it prints into the SQL Editor too (it contains only a hash of your secret).
+4. Restart the bot. Without these settings the bot runs normally and `/order` just says orders aren't connected.
+
+## VIP
+
+VIP is tracked in the bot's own database (not Supabase); admins set the expiry.
+
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/vip give user: expires:` | admin | Grants VIP, or changes the expiry. `expires` is a date (`2026-12-31`, end of that day UTC) or a length (`30d`, `4w`). |
+| `/vip check` | anyone | Shows your VIP status and expiration date. Admins can add `user:`. |
+| `/vip revoke user:` | admin | Removes someone's VIP. |
+| `/vip list` | admin | Everyone with active VIP, soonest-expiring first. |
+
+**Expiry reminder:** the bot DMs each VIP member once, 7 days before their VIP ends (checked on startup and hourly, so
+a restart doesn't miss anyone). Changing someone's expiry re-arms the reminder; granting a date that's already within
+7 days doesn't send an instant "expiring soon" DM. Members with DMs closed are skipped quietly.
+
+**Who is an admin:** members with the Discord **Administrator** permission, plus any role IDs in `adminRoleIds` in
+`config/config.jsonc`.
+
+## Shop status board (`/shop`)
+
+A public status board for the whole store, posted in the channel set by `shopStatus.channelId` in `config/config.jsonc`.
+It is **one message that's edited in place**, plus a short "what changed" announcement each time something important
+changes.
+
+| Command | Who | What it does |
+| --- | --- | --- |
+| `/shop open [note]` | admin | Store open. Announces it (pings `pingRoleId` if set). |
+| `/shop close [reason]` | admin | "Closed for today", with an optional reason / when you're back. |
+| `/shop queue level:` | admin | Queue **low / medium / high / full** (or hide it). |
+| `/shop sale state: [name] [details] [ends]` | admin | Sale **started**, **ending soon**, or **ended**. `ends` is a date (`2026-12-31`) or length (`3d`); the sale ends itself automatically at that time. |
+| `/shop note [text]` | admin | A short line on the board (no announcement). Leave empty to clear. |
+| `/shop announce message:` | admin | A one-off announcement. |
+| `/shop track user:` / `untrack` / `tracking` | admin | Whose live activity the board shows. |
+| `/shop refresh` | admin | Update the board now (re-posts it if it was deleted). |
+| `/shop view` | anyone | See the current status privately. |
+
+**Live activity ("working in Photoshop"):** the board reads the Discord presence of the people you add with
+`/shop track` and shows lines like *🎨 @you is working in **Photoshop*** or their custom status text. Updates are
+debounced and edit the board at most every ~30 seconds.
+
+- Only the **app name** is shown — never the file/project name from rich presence, which could reveal a customer's work.
+- Only creative apps (Photoshop, After Effects, Premiere, Illustrator, Lightroom, Blender, Cinema 4D, DaVinci Resolve,
+  Figma, Substance, Maya, 3ds Max, Affinity, Krita) and custom-status text are shown. Games, Spotify, etc. are ignored
+  unless `shopStatus.showOtherActivities` is `true`.
+- Custom-status text is public on the board once you track someone, so only track people who are fine with that.
+- **Requires the Presence Intent:** Developer Portal → your app → **Bot → Privileged Gateway Intents → Presence Intent**
+  must be on, otherwise the bot fails to log in with "Used disallowed intents". To run without it, set
+  `shopStatus.trackPresence` to `false` (everything else still works).
+- The bot needs **View Channel, Send Messages, and Embed Links** in the status channel.
+
 ## Setup
 
 1. **Create a Discord application** at https://discord.com/developers/applications,
    add a Bot user, and copy its token.
-2. Under **Bot → Privileged Gateway Intents**, enable **Server Members Intent**. This is
-   required — the bot requests it for role checks, and Discord rejects the login with
+2. Under **Bot → Privileged Gateway Intents**, enable **Server Members Intent** (and **Presence Intent** if you use the
+   shop status board's live activity). Server Members is required — the bot requests it for role checks, and Discord rejects the login with
    "Used disallowed intents" if it's off.
 3. Invite the bot to your server with the `bot` and `applications.commands` scopes and
    at minimum: Manage Channels, Manage Roles (channel-level), Send Messages, Read

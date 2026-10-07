@@ -30,7 +30,10 @@
       "modalContinue": "📝",
       "agent": "🧑‍💼",
       "resolved": "✅",
-      "escalation": "<:angryrelay:1549821076362760233>"
+      "escalation": "<:angryrelay:1549821076362760233>",
+      "barLeft": "<:lb_g:1492699180899237888>", // Divider bar on the shop status board: left corner, repeated middle, right corner
+      "barMiddle": "<:emojigg_l_g:1492699325686353991>",
+      "barRight": "<:lb4_g:1492699249396289608>"
     },
     "panel": {
       "heading": "TICKET CENTER",
@@ -136,6 +139,19 @@
     "createTranscript": true, // generates a local HTML transcript, no external upload
     "deleteAfterCloseSeconds": 0, // 0 = never auto-delete; e.g. 15 to delete 15s after close
     "moveToCategoryId": "1382492247454384199" // optional category closed tickets are moved to
+  },
+
+  // ── Shop status (/shop) ───────────────────────────────────────────────
+  // A public status board (edited in place) plus "what changed" announcements: store open/closed,
+  // queue low/high, sales started/ending. Live activity ("working in Photoshop") comes from the Discord
+  // presence of the people you add with /shop track — it needs the Presence Intent switched on in the
+  // Developer Portal (Bot -> Privileged Gateway Intents). Set trackPresence to false to run without it.
+  "shopStatus": {
+    "channelId": "1549880944511549480", // Public status channel
+    "pingRoleId": "", // Optional role pinged for store open / sales / announcements
+    "trackPresence": true,
+    "barLength": 10, // How many middle emojis in the divider bar (lower it if it wraps on phones)
+    "showOtherActivities": false // false = only creative apps (Photoshop, Blender, ...) and custom status text
   },
 
   // ── Presence ──────────────────────────────────────────────────────────

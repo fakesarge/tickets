@@ -49,6 +49,10 @@ export type Branding = {
 		agent: string;
 		resolved: string;
 		escalation: string;
+		/** Divider bar used by the shop status messages: left corner + repeated middle + right corner. Omit any to fall back to a plain line. */
+		barLeft?: string;
+		barMiddle?: string;
+		barRight?: string;
 	};
 	panel: {
 		heading: string;
@@ -67,6 +71,8 @@ export type BotConfig = {
 	logs: boolean;
 	ticketTypes: TicketType[];
 	rolesWithTicketAccess: string[];
+	/** Extra role IDs allowed to run admin-only commands (/order add|edit|status, /vip give|revoke|list). Members with the Administrator permission always can. */
+	adminRoleIds?: string[];
 	rolesBlockedFromCreatingTickets: string[];
 	maxOpenTicketsPerUser: number;
 	/** Fallback staff role IDs pinged when a ticket escalates and its type has no staffRoleIds. */
@@ -83,6 +89,19 @@ export type BotConfig = {
 		createTranscript: boolean;
 		deleteAfterCloseSeconds: number;
 		moveToCategoryId?: string;
+	};
+	/** Public shop-status board + announcements (/shop). */
+	shopStatus?: {
+		/** Channel the status board and announcements are posted in. */
+		channelId: string;
+		/** Optional role pinged for "store open", sales and announcements. */
+		pingRoleId?: string;
+		/** Show tracked members' live activity (needs the Presence intent). Default true. */
+		trackPresence?: boolean;
+		/** Middle emojis in the divider bar. Default 10. */
+		barLength?: number;
+		/** Also show non-creative apps/games a tracked member is running. Default false. */
+		showOtherActivities?: boolean;
 	};
 	presence: {
 		enabled: boolean;
