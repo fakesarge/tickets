@@ -39,6 +39,59 @@ model tickets {
   staffTakeover Boolean @default(false)
 }
 
+// ── Affiliates (creator codes) ─────────────────────────────────────────────────────────────────────
+// Lives entirely in the bot's own database. All money is stored as integer cents.
+
+model affiliates {
+  discordId      String @id
+  code           String @unique // always stored UPPERCASE
+  balanceCents   Int    @default(0) // available to withdraw
+  earnedCents    Int    @default(0) // lifetime earnings
+  withdrawnCents Int    @default(0) // lifetime paid out
+  createdBy      String
+  createdAt      BigInt
+}
+
+// One row per member currently using a code (a member supports one affiliate at a time).
+model affiliateReferrals {
+  memberId    String @id
+  affiliateId String
+  usedAt      BigInt
+
+  @@index([affiliateId])
+}
+
+model affiliateWithdrawals {
+  id              Int     @id @default(autoincrement())
+  affiliateId     String
+  amountCents     Int
+  payoutDetails   String
+  status          String  @default("pending") // pending | paid | rejected
+  requestedAt     BigInt
+  resolvedAt      BigInt?
+  resolvedBy      String?
+  note            String?
+  payoutChannelId String?
+  payoutMessageId String?
+
+  @@index([affiliateId])
+  @@index([status])
+}
+
+// Every balance change, so an affiliate's numbers can always be explained.
+model affiliateLedger {
+  id           Int     @id @default(autoincrement())
+  affiliateId  String
+  type         String // credit | debit | adjustment | withdrawal | refund
+  amountCents  Int // signed change to the balance
+  balanceAfter Int
+  note         String?
+  actor        String
+  createdAt    BigInt
+
+  @@index([affiliateId])
+}
+
 // VIP memberships are tracked here (not in Supabase). Admins set the expiry; reminderSentAt records
 // that the "expires in 7 days" DM has gone out so it is only sent once per expiry date.
 model vips {

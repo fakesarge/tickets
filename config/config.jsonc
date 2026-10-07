@@ -154,6 +154,15 @@
     "showOtherActivities": false // false = only creative apps (Photoshop, Blender, ...) and custom status text
   },
 
+  // ── Affiliates (/affiliate, /code) ────────────────────────────────────
+  // Creator-code program, stored in the bot's own database. Admins create affiliates and manage their
+  // balance; members enter a code with /code use; affiliates see their stats and request withdrawals.
+  "affiliate": {
+    "roleId": "", // Role given to affiliates (add it here after you create the role). Blank = no role needed
+    "payoutChannelId": "", // Staff channel where withdrawal requests appear with Approve / Reject buttons
+    "minWithdrawalUsd": 10 // Smallest withdrawal an affiliate can request
+  },
+
   // ── Presence ──────────────────────────────────────────────────────────
   "presence": {
     "enabled": true,

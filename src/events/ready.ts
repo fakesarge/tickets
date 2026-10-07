@@ -48,6 +48,8 @@ export default class ReadyEvent extends BaseEvent {
 		if (config.logs) checkChannel(config.logsChannelId, "logsChannelId");
 		for (const roleId of config.rolesWithTicketAccess) checkRole(roleId, "rolesWithTicketAccess");
 		for (const roleId of config.pingRolesOnOpen) checkRole(roleId, "pingRolesOnOpen");
+		checkRole(config.affiliate?.roleId, "affiliate.roleId");
+		checkChannel(config.affiliate?.payoutChannelId, "affiliate.payoutChannelId");
 
 		for (const t of config.ticketTypes) {
 			checkChannel(t.categoryId, `ticketTypes[${t.codeName}].categoryId`);

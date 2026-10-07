@@ -6,6 +6,9 @@ import { logEvent } from "../lib/logs";
 import { FLOW_CUSTOM_IDS } from "../lib/flows/render";
 import { handleFlowButton, handleFlowModalSubmit, handleFlowSelect } from "../lib/flows/engine";
 import { handleShowTerms, handleTosAgree, handleTosDecline, handleTosIntake } from "../lib/terms";
+import { handleWithdrawalButton } from "../lib/affiliatePayouts";
+import { handleUseCodeButton } from "../lib/affiliateShare";
+import { USE_CODE_BUTTON_PREFIX, WITHDRAWAL_BUTTON_PREFIX } from "../ui/affiliate";
 import { MSG } from "../ui/messages";
 
 type OpenInteraction = ButtonInteraction | StringSelectMenuInteraction;
@@ -27,6 +30,8 @@ export default class InteractionCreateEvent extends BaseEvent {
 			if (interaction.customId === "ticketShowTerms") return handleShowTerms(interaction, this.client);
 			if (interaction.customId === "tosAgree") return handleTosAgree(interaction, this.client);
 			if (interaction.customId === "tosDecline") return handleTosDecline(interaction, this.client);
+			if (interaction.customId.startsWith(WITHDRAWAL_BUTTON_PREFIX)) return handleWithdrawalButton(interaction, this.client);
+			if (interaction.customId.startsWith(USE_CODE_BUTTON_PREFIX)) return handleUseCodeButton(interaction, this.client);
 			if (this.isFlowButton(interaction.customId)) return handleFlowButton(interaction, this.client);
 			return this.handleButton(interaction);
 		}

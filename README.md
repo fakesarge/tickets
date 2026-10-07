@@ -152,6 +152,52 @@ a restart doesn't miss anyone). Changing someone's expiry re-arms the reminder; 
 **Who is an admin:** members with the Discord **Administrator** permission, plus any role IDs in `adminRoleIds` in
 `config/config.jsonc`.
 
+## Affiliates (creator codes)
+
+Like a Fortnite creator code: admins create affiliates, members enter a code to support one, and affiliates track
+their stats and withdraw their balance. It lives entirely in the bot's own database (four plain tables —
+`affiliates`, `affiliateReferrals`, `affiliateWithdrawals`, `affiliateLedger`) and has nothing to do with Supabase or `/order`.
+Balances are managed by admins; money is stored as whole cents.
+
+**Members**
+
+| Command | What it does |
+| --- | --- |
+| `/code use code:` | Support a creator with their code (autocompletes). **Posted publicly** with a "Use code" button so others can follow. Using a new code switches to it; you can't use your own. The creator gets a DM. |
+| `/code view` | **Public** card showing who you're supporting (private if you aren't using a code). |
+| `/code clear` | Stop using your code (private). |
+
+**Affiliates** (must be in the affiliate database, and have the `affiliate.roleId` role if one is set).
+Everything here is **public by default** so affiliates can show off; failed attempts are always private.
+
+| Command | What it does |
+| --- | --- |
+| `/affiliate share` | Posts your code with supporter count and a "Use code" button. Never shows money. |
+| `/affiliate me` | Your code, referrals, balance and progress toward the minimum withdrawal. Add `private:true` to hide it. |
+| `/affiliate stats` | The above plus rank and recent activity. Supports `private:true`. |
+| `/affiliate withdraw payout: [amount:]` | Requests a payout (empty `amount` = everything), shown publicly **without** the payout details — only staff see those. The amount is set aside immediately, one request at a time. |
+| `/affiliate history` | Your balance activity and past withdrawals. Supports `private:true`. |
+
+**Admins** (`/affiliate admin …`)
+
+| Command | What it does |
+| --- | --- |
+| `create user [code]` | Makes someone an affiliate and gives them `affiliate.roleId`. Code defaults to their username. |
+| `remove user` | Removes them (and the role); anyone using their code is detached. Blocked while a withdrawal is pending. |
+| `setcode user code` | Changes their code. |
+| `balance user action amount [note]` | **Add earnings** (balance and lifetime earnings up), **Remove** (clawback, both down), or **Set** the balance exactly (earnings untouched). The affiliate gets a DM. |
+| `view user` | Everything about one affiliate: stats, rank, latest referrals, ledger, withdrawals. |
+| `list` | All affiliates, top earners first. |
+| `payouts` | Withdrawals waiting for approval. |
+| `approve id [note]` / `reject id [reason]` | Mark a withdrawal paid, or reject it and refund the balance. The affiliate gets a DM. |
+| `export` | CSV files of all four tables (open in Excel or Google Sheets). |
+
+**Withdrawals:** if `affiliate.payoutChannelId` is set, each request is posted there with **Mark as paid** / **Reject & refund**
+buttons (admins only). Without it, use `/affiliate admin payouts`. Pay the person yourself (PayPal, etc.) and then mark it paid —
+the bot only does the bookkeeping. Set `affiliate.minWithdrawalUsd` for the smallest request allowed (default $10).
+
+Setup: create an "Affiliate" role, put its ID in `affiliate.roleId` (optional), and run `npm run setup` once so the new tables exist.
+
 ## Shop status board (`/shop`)
 
 A public status board for the whole store, posted in the channel set by `shopStatus.channelId` in `config/config.jsonc`.

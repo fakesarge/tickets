@@ -103,6 +103,15 @@ export type BotConfig = {
 		/** Also show non-creative apps/games a tracked member is running. Default false. */
 		showOtherActivities?: boolean;
 	};
+	/** Affiliate / creator-code program (/affiliate, /code). Everything is optional. */
+	affiliate?: {
+		/** Role given to affiliates when an admin creates them (and removed when they're removed). Affiliate commands also require it when set. */
+		roleId?: string;
+		/** Channel where withdrawal requests are posted with Approve / Reject buttons. */
+		payoutChannelId?: string;
+		/** Smallest amount an affiliate can withdraw, in USD. Default 10. */
+		minWithdrawalUsd?: number;
+	};
 	presence: {
 		enabled: boolean;
 		status: "online" | "idle" | "dnd" | "invisible";

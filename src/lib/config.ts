@@ -45,6 +45,13 @@ export function loadConfig(): BotConfig {
 		optionalSnowflake(config.shopStatus.pingRoleId, "shopStatus.pingRoleId", errors);
 	}
 
+	if (config.affiliate) {
+		optionalSnowflake(config.affiliate.roleId, "affiliate.roleId", errors);
+		optionalSnowflake(config.affiliate.payoutChannelId, "affiliate.payoutChannelId", errors);
+		const min = config.affiliate.minWithdrawalUsd;
+		if (min !== undefined && (typeof min !== "number" || !Number.isFinite(min) || min < 0)) errors.push("affiliate.minWithdrawalUsd must be a number ≥ 0");
+	}
+
 	if (!Array.isArray(config.ticketTypes) || config.ticketTypes.length === 0) errors.push("at least one ticket type is required");
 	if (config.ticketTypes?.length > 25) errors.push("a maximum of 25 ticket types is supported (Discord limit)");
 

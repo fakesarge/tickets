@@ -62,6 +62,7 @@ export const MSG = {
 	vipRevoked: (userId: string) => `> Removed VIP from <@${userId}>`,
 	vipNotFound: (userId: string) => `<@${userId}> doesn't have a VIP record.`,
 	vipOwnOnly: "You can only check your own VIP.",
+	affiliateOnly: "That command is for affiliates. Interested in becoming one? Open a ticket and let the team know!",
 
 	flowStaffHandling: "A staff member is already handling this ticket.",
 	flowModalAck: "Got it — thanks!",
